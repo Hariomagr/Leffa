@@ -137,6 +137,7 @@ class LeffaPredictor(object):
 
 leffa_predictor = None
 def init():
+    global leffa_predictor
     # Download checkpoints
     snapshot_download(repo_id="franciszzj/Leffa", local_dir="./ckpts")
     leffa_predictor = LeffaPredictor()
