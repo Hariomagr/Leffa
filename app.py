@@ -9,12 +9,9 @@ from leffa_utils.densepose_predictor import DensePosePredictor
 from leffa_utils.utils import resize_and_center, list_dir, get_agnostic_mask_hd, get_agnostic_mask_dc
 from preprocess.humanparsing.run_parsing import Parsing
 from preprocess.openpose.run_openpose import OpenPose
+from diffusers.utils import load_image
 
 import gradio as gr
-
-# Download checkpoints
-snapshot_download(repo_id="franciszzj/Leffa", local_dir="./ckpts")
-
 
 class LeffaPredictor(object):
     def __init__(self):
@@ -74,9 +71,9 @@ class LeffaPredictor(object):
     ):
         assert control_type in [
             "virtual_tryon", "pose_transfer"], "Invalid control type: {}".format(control_type)
-        src_image = Image.open(src_image_path)
-        ref_image = Image.open(ref_image_path)
-        mask_image = Image.open(mask_image_path)
+        src_image = load_image(src_image_path)
+        ref_image = load_image(ref_image_path)
+        mask_image = load_image(mask_image_path)
         src_image = resize_and_center(src_image, 768, 1024).convert("RGB")
         ref_image = resize_and_center(ref_image, 768, 1024).convert("RGB")
         mask_image = resize_and_center(mask_image, 768, 1024).convert("RGB")
@@ -138,20 +135,24 @@ class LeffaPredictor(object):
     def leffa_predict_pt(self, src_image_path, ref_image_path, mask_image_path, ref_acceleration, step, scale, seed):
         return self.leffa_predict(src_image_path, ref_image_path, mask_image_path, "pose_transfer", ref_acceleration, step, scale, seed)
 
+leffa_predictor = None
+def init():
+    # Download checkpoints
+    snapshot_download(repo_id="franciszzj/Leffa", local_dir="./ckpts")
+    leffa_predictor = LeffaPredictor()
 
 def runModel(
     cloth_image_url,
     person_image_url,
     mask_image_url,
     acceleration = False,
-    step = 50
-    scale = 2.5
-    seed = 42
-    model_type = "viton_hd" # dress_code or viton_hd
-    garment_type = "upper_body" # upper_body, lower_body, dresses
+    step = 50,
+    scale = 2.5,
+    seed = 42,
+    model_type = "viton_hd", # dress_code or viton_hd
+    garment_type = "upper_body", # upper_body, lower_body, dresses
     repaint = False
 ):
-    leffa_predictor = LeffaPredictor()
     generated_image = leffa_predictor.leffa_predict_vt(
         person_image_url,
         cloth_image_url,
