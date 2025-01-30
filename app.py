@@ -139,14 +139,18 @@ class LeffaPredictor(object):
         return self.leffa_predict(src_image_path, ref_image_path, mask_image_path, "pose_transfer", ref_acceleration, step, scale, seed)
 
 
-def runModel(cloth_image_url, person_image_url, mask_image_url):
-    acceleration = False
+def runModel(
+    cloth_image_url,
+    person_image_url,
+    mask_image_url,
+    acceleration = False,
     step = 50
     scale = 2.5
     seed = 42
     model_type = "viton_hd" # dress_code or viton_hd
     garment_type = "upper_body" # upper_body, lower_body, dresses
     repaint = False
+):
     leffa_predictor = LeffaPredictor()
     generated_image = leffa_predictor.leffa_predict_vt(
         person_image_url,
@@ -161,3 +165,4 @@ def runModel(cloth_image_url, person_image_url, mask_image_url):
         repaint
     )
     generated_image.save("generated_image.png")
+    return generated_image
